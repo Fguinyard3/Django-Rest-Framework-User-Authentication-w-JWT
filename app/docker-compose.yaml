@@ -1,0 +1,38 @@
+version: "3.9"
+   
+services:
+  db:
+    image: postgres
+    volumes:
+      - ./data/db:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+  web:
+    build: .
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - .:/code
+    
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgres://postgres:postgres@db:5432/postgres
+      #Needs to escape the dollar sign in the secret key
+      - SECRET_KEY=django-insecure-2-3wo6*u%-z#f1$$8js4w4qyg92lu#87acuifcku&46)#ltgh*c
+      - ALLOWED_HOSTS=*
+      - CORS_ALLOWED_ORIGINS=http://localhost:8000
+      - OTHER_ORIGINS=https://8000-arraycom-testsbackend-zuvba82eujo.ws-us45.gitpod.io
+      - POSTGRES_NAME=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    depends_on:
+      - db
+  frontend:
+    build: ./frontend
+    command: npm run build
+    volumes:
+      - .:/app
+    depends_on:
+      - web
